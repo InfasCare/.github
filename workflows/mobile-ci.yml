@@ -1,0 +1,31 @@
+name: InfasCare Mobile CI
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mobile-ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  validate:
+    name: Lint and TypeScript
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: ESLint
+        run: npm run lint
+      - name: TypeScript
+        run: npx tsc --noEmit
+      - name: Check Expo dependency compatibility
+        run: npx expo install --check
